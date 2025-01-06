@@ -32,7 +32,6 @@ public class HttpParser {
             e.printStackTrace();
         }
 
-        // TODO: Check if there is websocket upgrade header field
         System.out.println(request);
 
         parseBody(reader, request);
@@ -132,7 +131,7 @@ public class HttpParser {
 
         String fieldName = headerFieldParts[0].trim();
         String fieldValue = headerFieldParts[1].trim();
-        request.addHeader(fieldName, fieldValue);
+        request.addHeaderField(fieldName, fieldValue);
     }
 
     private void parseBody(InputStreamReader reader, HttpRequest request) {

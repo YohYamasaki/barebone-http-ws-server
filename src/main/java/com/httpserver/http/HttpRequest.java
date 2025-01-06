@@ -1,5 +1,7 @@
 package com.httpserver.http;
 
+import java.util.Objects;
+
 public class HttpRequest extends HttpMessage {
     private HttpMethod method;
     private String requestTarget;
@@ -7,7 +9,6 @@ public class HttpRequest extends HttpMessage {
     private HttpVersion bestCompatibleHttpVersion;
 
     public HttpRequest() {
-
     }
 
     public HttpMethod getMethod() {
@@ -53,4 +54,20 @@ public class HttpRequest extends HttpMessage {
         }
     }
 
+    // TODO: refactor code a bit & add check for Sec-WebSocket-Key value length
+    public boolean isWebsocketUpgrade() {
+        final String hostValue = getHeaderFields("Host");
+        final String upgradeValue = getHeaderFields("Upgrade");
+        final String connectionValue = getHeaderFields("Connection");
+        final String originValue = getHeaderFields("Origin");
+        final String secWebSocketKeyValue = getHeaderFields("Sec-WebSocket-Key");
+        final String secWebSocketVersionValue = getHeaderFields("Sec-WebSocket-Version");
+
+        return hostValue != null
+                && upgradeValue != null && upgradeValue.contains("websocket")
+                && connectionValue != null && connectionValue.contains("Upgrade")
+                && originValue != null
+                && secWebSocketKeyValue != null
+                && Objects.equals(secWebSocketVersionValue, "13");
+    }
 }

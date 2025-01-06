@@ -12,6 +12,7 @@ import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class HttpHeadersParserTest {
@@ -31,10 +32,10 @@ public class HttpHeadersParserTest {
         HttpRequest request = new HttpRequest();
         parseHeadersMethod.invoke(
                 httpParser,
-                generateSimpleSingleHeaderMessage(),
+                generateSimpleSingleHeaderField(),
                 request);
-        assertEquals(1, request.getHeaderNames().size());
-        assertEquals("localhost:8080", request.getHeader("host"));
+        assertEquals(1, request.getHeaderFieldNames().size());
+        assertEquals("localhost:8080", request.getHeaderFields("host"));
     }
 
     @Test
@@ -42,10 +43,10 @@ public class HttpHeadersParserTest {
         HttpRequest request = new HttpRequest();
         parseHeadersMethod.invoke(
                 httpParser,
-                generateMultipleHeadersMessage(),
+                generateMultipleHeaderFields(),
                 request);
-        assertEquals(10, request.getHeaderNames().size());
-        assertEquals("localhost:8080", request.getHeader("host"));
+        assertEquals(10, request.getHeaderFieldNames().size());
+        assertEquals("localhost:8080", request.getHeaderFields("host"));
     }
 
     @Test
@@ -54,7 +55,7 @@ public class HttpHeadersParserTest {
         try {
             parseHeadersMethod.invoke(
                     httpParser,
-                    generateSpaceBeforeColonErrorHeaderMessage(),
+                    generateSpaceBeforeColonErrorHeaderFields(),
                     request);
         } catch (InvocationTargetException e) {
             if (e.getCause() instanceof HttpParsingException) {
@@ -63,28 +64,31 @@ public class HttpHeadersParserTest {
         }
     }
 
-    private InputStreamReader generateSimpleSingleHeaderMessage() {
-        String rawData = "Host: localhost:8080\r\n";
-//                "Connection: keep-alive\r\n" +
-//                "Upgrade-Insecure-Requests: 1\r\n" +
-//                "User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.97 Safari/537.36\r\n" +
-//                "Sec-Fetch-User: ?1\r\n" +
-//                "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3\r\n" +
-//                "Sec-Fetch-Site: none\r\n" +
-//                "Sec-Fetch-Mode: navigate\r\n" +
-//                "Accept-Encoding: gzip, deflate, br\r\n" +
-//                "Accept-Language: en-US,en;q=0.9,es;q=0.8,pt;q=0.7,de-DE;q=0.6,de;q=0.5,la;q=0.4\r\n" +
-//                "\r\n";
-        InputStream inputStream = new ByteArrayInputStream(
-                rawData.getBytes(
-                        StandardCharsets.US_ASCII
-                )
-        );
-        InputStreamReader reader = new InputStreamReader(inputStream, StandardCharsets.US_ASCII);
-        return reader;
+    @Test
+    public void testValidWebsocketUpgradeHeader() throws InvocationTargetException, IllegalAccessException {
+        HttpRequest request = new HttpRequest();
+        parseHeadersMethod.invoke(
+                httpParser,
+                generateValidWebsocketUpgradeHeaderFields(),
+                request);
+        System.out.println("websocket request!!!!!");
+        System.out.println(request.getHeaderFieldNames());
+
+//        request.getHeaderFieldNames().forEach(System.out::println);
+        assertTrue(request.isWebsocketUpgrade());
     }
 
-    private InputStreamReader generateMultipleHeadersMessage() {
+    private InputStreamReader generateSimpleSingleHeaderField() {
+        String rawData = "Host: localhost:8080\r\n";
+        InputStream inputStream = new ByteArrayInputStream(
+                rawData.getBytes(
+                        StandardCharsets.UTF_8
+                )
+        );
+        return new InputStreamReader(inputStream, StandardCharsets.UTF_8);
+    }
+
+    private InputStreamReader generateMultipleHeaderFields() {
         String rawData = "Host: localhost:8080\r\n" +
                 "Connection: keep-alive\r\n" +
                 "Upgrade-Insecure-Requests: 1\r\n" +
@@ -98,21 +102,35 @@ public class HttpHeadersParserTest {
                 "\r\n";
         InputStream inputStream = new ByteArrayInputStream(
                 rawData.getBytes(
-                        StandardCharsets.US_ASCII
+                        StandardCharsets.UTF_8
                 )
         );
-        InputStreamReader reader = new InputStreamReader(inputStream, StandardCharsets.US_ASCII);
-        return reader;
+        return new InputStreamReader(inputStream, StandardCharsets.UTF_8);
     }
 
-    private InputStreamReader generateSpaceBeforeColonErrorHeaderMessage() {
+    private InputStreamReader generateSpaceBeforeColonErrorHeaderFields() {
         String rawData = "Host : localhost:8080\r\n\r\n";
         InputStream inputStream = new ByteArrayInputStream(
                 rawData.getBytes(
-                        StandardCharsets.US_ASCII
+                        StandardCharsets.UTF_8
                 )
         );
-        InputStreamReader reader = new InputStreamReader(inputStream, StandardCharsets.US_ASCII);
-        return reader;
+        return new InputStreamReader(inputStream, StandardCharsets.UTF_8);
+    }
+
+    private InputStreamReader generateValidWebsocketUpgradeHeaderFields() {
+        String rawData =
+                "Host: server.example.com\r\n" +
+                        "Upgrade: websocket\r\n" +
+                        "Connection: Upgrade\r\n" +
+                        "Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==\r\n" +
+                        "Origin: http://example.com\r\n" +
+                        "Sec-WebSocket-Version: 13\r\n\r\n";
+        InputStream inputStream = new ByteArrayInputStream(
+                rawData.getBytes(
+                        StandardCharsets.UTF_8
+                )
+        );
+        return new InputStreamReader(inputStream, StandardCharsets.UTF_8);
     }
 }

@@ -32,9 +32,12 @@ public class HttpConnectionWorkerThread extends Thread {
             outputStream = socket.getOutputStream();
 
             HttpRequest request = httpParser.parseHttpRequest(inputStream);
-            HttpResponse response = handleRequest(request);
-
-            outputStream.write(response.getResponseBytes());
+            if (request.isWebsocketUpgrade()) {
+                // Switch to websocket connection
+            } else {
+                HttpResponse response = handleRequest(request);
+                outputStream.write(response.getResponseBytes());
+            }
 
             LOGGER.info("Connection finished");
         } catch (IOException e) {

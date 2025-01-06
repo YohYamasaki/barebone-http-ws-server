@@ -13,7 +13,7 @@ public class HttpResponse extends HttpMessage {
     public void setHttpVersion(String httpVersion) {
         this.httpVersion = httpVersion;
     }
-    
+
     public void setStatusCode(HttpStatusCode statusCode) {
         this.statusCode = statusCode;
     }
@@ -37,10 +37,10 @@ public class HttpResponse extends HttpMessage {
                 .append(" ")
                 .append(getReasonPhrase())
                 .append(CRLF);
-        for (String headerName : getHeaderNames()) {
+        for (String headerName : getHeaderFieldNames()) {
             responseBuilder.append(headerName)
                     .append(": ")
-                    .append(getHeader(headerName))
+                    .append(getHeaderFields(headerName))
                     .append(CRLF);
         }
         responseBuilder.append(CRLF);
@@ -72,7 +72,7 @@ public class HttpResponse extends HttpMessage {
         }
 
         public Builder addHeader(String headerName, String headerField) {
-            response.addHeader(headerName, headerField);
+            response.addHeaderField(headerName, headerField);
             return this;
         }
 

@@ -1,17 +1,19 @@
 package com.httpserver.http;
 
+import org.jetbrains.annotations.Nullable;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
 
 public abstract class HttpMessage {
-    private final HashMap<String, String> headers = new HashMap<>();
+    private final HashMap<String, String> headerFields = new HashMap<>();
     private byte[] messageBody = new byte[0];
 
     public String toString() {
         String res = "";
-        for (Map.Entry<String, String> entry : headers.entrySet()) {
+        for (Map.Entry<String, String> entry : headerFields.entrySet()) {
             String key = entry.getKey();
             Object value = entry.getValue();
             res = String.format("%s%s: %s\n", res, key, value);
@@ -19,16 +21,17 @@ public abstract class HttpMessage {
         return res;
     }
 
-    public Set<String> getHeaderNames() {
-        return headers.keySet();
+    public Set<String> getHeaderFieldNames() {
+        return headerFields.keySet();
     }
 
-    public String getHeader(String headerName) {
-        return headers.get(headerName.toLowerCase());
+    @Nullable
+    public String getHeaderFields(String headerName) {
+        return headerFields.get(headerName.toLowerCase());
     }
 
-    void addHeader(String headerName, String headerField) {
-        headers.put(headerName.toLowerCase(), headerField);
+    void addHeaderField(String fieldName, String fieldValue) {
+        headerFields.put(fieldName.toLowerCase(), fieldValue);
     }
 
     public byte[] getMessageBody() {

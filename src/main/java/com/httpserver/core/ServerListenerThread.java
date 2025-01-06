@@ -12,18 +12,12 @@ import java.net.Socket;
 public class ServerListenerThread extends Thread {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(ServerListenerThread.class);
-    private final int port;
-    private final String webroot;
     private final ServerSocket serverSocket;
-
-
     private final WebRootHandler webRootHandler;
 
     public ServerListenerThread(int port, String webroot) throws IOException, WebRootNotFoundException {
-        this.port = port;
-        this.webroot = webroot;
         this.webRootHandler = new WebRootHandler(webroot);
-        this.serverSocket = new ServerSocket(this.port);
+        this.serverSocket = new ServerSocket(port);
     }
 
     @Override
@@ -39,7 +33,6 @@ public class ServerListenerThread extends Thread {
 
                 workerThread.start();
             }
-//            serverSocket.close();
         } catch (IOException e) {
             e.printStackTrace();
             LOGGER.error(e.getMessage(), e);
