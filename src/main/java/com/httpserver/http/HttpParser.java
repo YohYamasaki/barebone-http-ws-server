@@ -32,8 +32,6 @@ public class HttpParser {
             e.printStackTrace();
         }
 
-        System.out.println(request);
-
         parseBody(reader, request);
 
         return request;
@@ -135,7 +133,7 @@ public class HttpParser {
     }
 
     private void parseBody(InputStreamReader reader, HttpRequest request) {
-
+        
     }
 
 

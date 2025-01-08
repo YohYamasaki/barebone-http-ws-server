@@ -32,12 +32,8 @@ public class HttpConnectionWorkerThread extends Thread {
             outputStream = socket.getOutputStream();
 
             HttpRequest request = httpParser.parseHttpRequest(inputStream);
-            if (request.isWebsocketUpgrade()) {
-                // Switch to websocket connection
-            } else {
-                HttpResponse response = handleRequest(request);
-                outputStream.write(response.getResponseBytes());
-            }
+            HttpResponse response = handleRequest(request);
+            outputStream.write(response.getResponseBytes());
 
             LOGGER.info("Connection finished");
         } catch (IOException e) {
@@ -80,19 +76,24 @@ public class HttpConnectionWorkerThread extends Thread {
         }
     }
 
-    private HttpResponse handleRequest(HttpRequest request) {
-        switch (request.getMethod()) {
-            case GET:
-                LOGGER.info(" * GET Request");
-                return handleGetRequest(request, true);
-            case HEAD:
-                LOGGER.info(" * HEAD Request");
-                return handleGetRequest(request, false);
-            default:
-                return new HttpResponse.Builder()
-                        .httpVersion(request.getBestCompatibleHttpVersion().LITERAL)
-                        .statusCode(HttpStatusCode.SERVER_ERROR_501_NOT_IMPLEMENTED)
-                        .build();
+    private HttpResponse handleRequest(HttpRequest request) throws HttpParsingException {
+        if (request.isWebsocketUpgrade()) {
+            LOGGER.info(" * WebSocket Upgrade Request");
+            return handleWebSocketUpgradeRequest(request);
+        } else {
+            switch (request.getMethod()) {
+                case GET:
+                    LOGGER.info(" * GET Request");
+                    return handleGetRequest(request, true);
+                case HEAD:
+                    LOGGER.info(" * HEAD Request");
+                    return handleGetRequest(request, false);
+                default:
+                    return new HttpResponse.Builder()
+                            .httpVersion(request.getBestCompatibleHttpVersion().LITERAL)
+                            .statusCode(HttpStatusCode.SERVER_ERROR_501_NOT_IMPLEMENTED)
+                            .build();
+            }
         }
     }
 
@@ -119,5 +120,15 @@ public class HttpConnectionWorkerThread extends Thread {
                     .statusCode(HttpStatusCode.SERVER_ERROR_500_INTERNAL_SERVER_ERROR)
                     .build();
         }
+    }
+
+    private HttpResponse handleWebSocketUpgradeRequest(HttpRequest request) throws HttpParsingException {
+        return new HttpResponse.Builder()
+                .httpVersion(request.getBestCompatibleHttpVersion().LITERAL)
+                .statusCode(HttpStatusCode.WEBSOCKET_UPGRADE)
+                .addHeader("Upgrade", "websocket")
+                .addHeader("Connection", "Upgrade")
+                .addHeader("Sec-WebSocket-Accept", request.getSecWebsocketAcceptValue())
+                .build();
     }
 }

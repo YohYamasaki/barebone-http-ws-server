@@ -1,6 +1,8 @@
 package com.httpserver.http;
 
-import java.util.Objects;
+import org.apache.commons.codec.digest.DigestUtils;
+
+import java.util.Base64;
 
 public class HttpRequest extends HttpMessage {
     private HttpMethod method;
@@ -54,20 +56,33 @@ public class HttpRequest extends HttpMessage {
         }
     }
 
-    // TODO: refactor code a bit & add check for Sec-WebSocket-Key value length
     public boolean isWebsocketUpgrade() {
-        final String hostValue = getHeaderFields("Host");
-        final String upgradeValue = getHeaderFields("Upgrade");
-        final String connectionValue = getHeaderFields("Connection");
-        final String originValue = getHeaderFields("Origin");
-        final String secWebSocketKeyValue = getHeaderFields("Sec-WebSocket-Key");
-        final String secWebSocketVersionValue = getHeaderFields("Sec-WebSocket-Version");
+        final String websocketKeyValue = getHeaderFields("Sec-WebSocket-Key");
+        return containsHeader("Host")
+                && containsHeaderValue("Upgrade", "websocket")
+                && containsHeaderValue("Connection", "Upgrade")
+                && containsHeader("Origin")
+                && containsHeader("Sec-WebSocket-Key")
+                && websocketKeyValue.length() == 24
+                && "13".equals(getHeaderFields("Sec-WebSocket-Version"));
+    }
 
-        return hostValue != null
-                && upgradeValue != null && upgradeValue.contains("websocket")
-                && connectionValue != null && connectionValue.contains("Upgrade")
-                && originValue != null
-                && secWebSocketKeyValue != null
-                && Objects.equals(secWebSocketVersionValue, "13");
+    private boolean containsHeader(String headerName) {
+        return getHeaderFields(headerName) != null;
+    }
+
+    private boolean containsHeaderValue(String headerName, String value) {
+        String headerValue = getHeaderFields(headerName);
+        return headerValue != null && headerValue.contains(value);
+    }
+
+    public String getSecWebsocketAcceptValue() throws HttpParsingException {
+        final String websocketKeyValue = getHeaderFields("Sec-WebSocket-Key");
+        if (websocketKeyValue == null || websocketKeyValue.length() != 24) {
+            throw new HttpParsingException(HttpStatusCode.CLIENT_ERROR_400_BAD_REQUEST);
+        }
+        final byte[] hash = DigestUtils.sha1(websocketKeyValue + "258EAFA5-E914-47DA-95CA-C5AB0DC85B11");
+        System.out.println();
+        return Base64.getEncoder().encodeToString(hash);
     }
 }

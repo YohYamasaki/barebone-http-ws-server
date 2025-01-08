@@ -11,8 +11,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class HttpHeadersParserTest {
@@ -71,11 +70,27 @@ public class HttpHeadersParserTest {
                 httpParser,
                 generateValidWebsocketUpgradeHeaderFields(),
                 request);
-        System.out.println("websocket request!!!!!");
-        System.out.println(request.getHeaderFieldNames());
-
-//        request.getHeaderFieldNames().forEach(System.out::println);
         assertTrue(request.isWebsocketUpgrade());
+    }
+
+    @Test
+    public void testNoUpgradeUpgradeWebsocketUpgradeHeader() throws InvocationTargetException, IllegalAccessException {
+        HttpRequest request = new HttpRequest();
+        parseHeadersMethod.invoke(
+                httpParser,
+                generateNoUpgradeWebsocketUpgradeHeaderFields(),
+                request);
+        assertFalse(request.isWebsocketUpgrade());
+    }
+
+    @Test
+    public void testInvalidSecKeyWebsocketUpgradeHeader() throws InvocationTargetException, IllegalAccessException {
+        HttpRequest request = new HttpRequest();
+        parseHeadersMethod.invoke(
+                httpParser,
+                generateInvalidSecKeyWebsocketUpgradeHeaderFields(),
+                request);
+        assertFalse(request.isWebsocketUpgrade());
     }
 
     private InputStreamReader generateSimpleSingleHeaderField() {
@@ -124,6 +139,37 @@ public class HttpHeadersParserTest {
                         "Upgrade: websocket\r\n" +
                         "Connection: Upgrade\r\n" +
                         "Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==\r\n" +
+                        "Origin: http://example.com\r\n" +
+                        "Sec-WebSocket-Version: 13\r\n\r\n";
+        InputStream inputStream = new ByteArrayInputStream(
+                rawData.getBytes(
+                        StandardCharsets.UTF_8
+                )
+        );
+        return new InputStreamReader(inputStream, StandardCharsets.UTF_8);
+    }
+
+    private InputStreamReader generateNoUpgradeWebsocketUpgradeHeaderFields() {
+        String rawData =
+                "Host: server.example.com\r\n" +
+                        "Connection: Upgrade\r\n" +
+                        "Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==\r\n" +
+                        "Origin: http://example.com\r\n" +
+                        "Sec-WebSocket-Version: 13\r\n\r\n";
+        InputStream inputStream = new ByteArrayInputStream(
+                rawData.getBytes(
+                        StandardCharsets.UTF_8
+                )
+        );
+        return new InputStreamReader(inputStream, StandardCharsets.UTF_8);
+    }
+
+    private InputStreamReader generateInvalidSecKeyWebsocketUpgradeHeaderFields() {
+        String rawData =
+                "Host: server.example.com\r\n" +
+                        "Upgrade: websocket\r\n" +
+                        "Connection: Upgrade\r\n" +
+                        "Sec-WebSocket-Key: dGhlIH\r\n" +
                         "Origin: http://example.com\r\n" +
                         "Sec-WebSocket-Version: 13\r\n\r\n";
         InputStream inputStream = new ByteArrayInputStream(

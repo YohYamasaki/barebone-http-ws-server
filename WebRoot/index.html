@@ -1,17 +1,25 @@
 <html>
 <head>
-    <title>Simple Java HTTP Server</title>
+    <title>Bare-bone HTTP + WebSocket Server</title>
     <style>
         body {
             text-align: center;
         }
     </style>
 </head>
-<br>
 <h1>Welcome to our first rendered page!</h1>
-<br>
-<h2>This page was delivered using our own made Https Server made in Java.</h2>
-<br>
-<br>
+<h2>This page was delivered using our own made Http Server made in Java.</h2>
+<button id="open-ws">Open WebSocket Connection</button>
 <img src="logo.png"/>
+<script>
+    function openWebSocket() {
+        const webSocket = new WebSocket("ws://localhost:8080");
+        webSocket.onopen = () => {
+            console.log("webSocket opened :) ");
+        }
+    }
+
+    const wsButtonEl = document.querySelector("button#open-ws");
+    wsButtonEl.addEventListener("click", openWebSocket);
+</script>
 </html>
