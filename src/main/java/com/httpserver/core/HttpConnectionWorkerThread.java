@@ -13,10 +13,11 @@ import java.io.OutputStream;
 import java.net.Socket;
 
 public class HttpConnectionWorkerThread extends Thread {
-    private final static Logger LOGGER = LoggerFactory.getLogger(ServerListenerThread.class);
+    private final static Logger LOGGER = LoggerFactory.getLogger(HttpConnectionWorkerThread.class);
     private final Socket socket;
     private final HttpParser httpParser = new HttpParser();
     private final WebRootHandler webRootHandler;
+    private boolean isWebsocketConnection = false;
 
     public HttpConnectionWorkerThread(Socket socket, WebRootHandler webRootHandler) {
         this.socket = socket;
@@ -25,76 +26,55 @@ public class HttpConnectionWorkerThread extends Thread {
 
     @Override
     public void run() {
-        InputStream inputStream = null;
-        OutputStream outputStream = null;
+        InputStream inputStream;
+        OutputStream outputStream;
         try {
             inputStream = socket.getInputStream();
             outputStream = socket.getOutputStream();
 
             HttpRequest request = httpParser.parseHttpRequest(inputStream);
-            HttpResponse response = handleRequest(request);
-            outputStream.write(response.getResponseBytes());
+            if (request.isWebsocketUpgrade()) {
+                LOGGER.info("WebSocket Upgrade Request detected.");
+                // WebSocketハンドシェイク処理
+                HttpResponse handshakeResponse = handleWebSocketUpgradeRequest(request);
+                outputStream.write(handshakeResponse.getResponseBytes());
 
-            LOGGER.info("Connection finished");
-        } catch (IOException e) {
-            LOGGER.error(e.getMessage(), e);
-        } catch (HttpParsingException e) {
-            LOGGER.info("Bag Request", e);
-            HttpResponse response = new HttpResponse.Builder()
-                    .httpVersion(HttpVersion.HTTP_1_1.LITERAL)
-                    .statusCode(e.getErrorCode())
-                    .build();
-            try {
+                // WebSocketの処理スレッドを起動
+                WebsocketWorkerThread websocketWorkerThread = new WebsocketWorkerThread(socket);
+                websocketWorkerThread.start();
+                isWebsocketConnection = true;
+            } else {
+                // 通常のHTTPリクエストを処理
+                HttpResponse response = handleRequest(request);
                 outputStream.write(response.getResponseBytes());
-            } catch (IOException ex) {
-                LOGGER.error("Problem with communication", e);
             }
+
+        } catch (IOException | HttpParsingException e) {
+            LOGGER.error("Error processing request: ", e);
         } finally {
-            if (inputStream != null) {
-                try {
-                    inputStream.close();
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-
-            if (outputStream != null) {
-                try {
-                    outputStream.close();
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-
-            if (socket != null) {
+            if (!isWebsocketConnection) {
                 try {
                     socket.close();
+                    LOGGER.info("Socket closed");
                 } catch (IOException e) {
-                    throw new RuntimeException(e);
+                    LOGGER.error("Error closing socket", e);
                 }
             }
         }
     }
 
     private HttpResponse handleRequest(HttpRequest request) throws HttpParsingException {
-        if (request.isWebsocketUpgrade()) {
-            LOGGER.info(" * WebSocket Upgrade Request");
-            return handleWebSocketUpgradeRequest(request);
-        } else {
-            switch (request.getMethod()) {
-                case GET:
-                    LOGGER.info(" * GET Request");
-                    return handleGetRequest(request, true);
-                case HEAD:
-                    LOGGER.info(" * HEAD Request");
-                    return handleGetRequest(request, false);
-                default:
-                    return new HttpResponse.Builder()
-                            .httpVersion(request.getBestCompatibleHttpVersion().LITERAL)
-                            .statusCode(HttpStatusCode.SERVER_ERROR_501_NOT_IMPLEMENTED)
-                            .build();
+        return switch (request.getMethod()) {
+            case GET -> {
+                LOGGER.info(" * GET Request");
+                yield handleGetRequest(request, true);
             }
-        }
+            case HEAD -> {
+                LOGGER.info(" * HEAD Request");
+                yield handleGetRequest(request, false);
+            }
+        };
+
     }
 
     private HttpResponse handleGetRequest(HttpRequest request, boolean setMessageBody) {

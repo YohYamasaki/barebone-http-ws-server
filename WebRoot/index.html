@@ -8,18 +8,65 @@
     </style>
 </head>
 <h1>Welcome to our first rendered page!</h1>
-<h2>This page was delivered using our own made Http Server made in Java.</h2>
+
+<img src="duck.jpg" style="max-width:300px;width:100%;height:auto;"/>
+<br/>
 <button id="open-ws">Open WebSocket Connection</button>
-<img src="logo.png"/>
+<br/>
+<div id="message-wrap" style="display:none;">
+    <button id="close-ws">Close WebSocket Connection</button>
+    <br/>
+    <label for="message">Message</label>
+    <input id="message" name="message" type="text"/><br/>
+    <button id="send-message">Send Message</button>
+    <div id="response-wrap"></div>
+</div>
+
 <script>
+    let webSocket = undefined;
+    let isSocketOpen = false;
+    const messageWrapEl = document.querySelector("#message-wrap");
+    const responseWrapEl = document.querySelector('#response-wrap');
+
     function openWebSocket() {
-        const webSocket = new WebSocket("ws://localhost:8080");
+        webSocket = new WebSocket("ws://localhost:8080");
         webSocket.onopen = () => {
-            console.log("webSocket opened :) ");
+            console.log("webSocket opened :)");
+            isSocketOpen = true;
+            messageWrapEl.style.display = "block";
+            wsOpenButtonEl.style.display = "none";
         }
+
+        webSocket.onclose = () => {
+            console.log("webSocket closed, bye");
+            messageWrapEl.style.display = "none";
+            wsOpenButtonEl.style.display = "initial";
+        }
+
+        webSocket.onmessage = (event) => {
+            const responseEl = document.createElement('p');
+            responseEl.textContent = event.data;
+            responseWrapEl.append(responseEl);
+        };
     }
 
-    const wsButtonEl = document.querySelector("button#open-ws");
-    wsButtonEl.addEventListener("click", openWebSocket);
+    const wsOpenButtonEl = document.querySelector("button#open-ws");
+    wsOpenButtonEl.addEventListener("click", openWebSocket);
+
+    const inputEl = document.querySelector("input#message");
+    const messageButtonEl = document.querySelector("button#send-message");
+    messageButtonEl.addEventListener("click", () => {
+        const value = inputEl.value
+        if (webSocket && isSocketOpen && value !== "") {
+            webSocket.send(value);
+        }
+    });
+
+    const wsCloseButtonEl = document.querySelector("button#close-ws");
+    wsCloseButtonEl.addEventListener("click", () => {
+        if (webSocket && isSocketOpen) {
+            webSocket.close();
+        }
+    });
 </script>
 </html>

@@ -1,8 +1,6 @@
 package com.httpserver.http;
 
 public class HttpResponse extends HttpMessage {
-    private final String CRLF = "\r\n";
-    // status-line = HTTP-version SP status-code SP reason-phrase CRLF
     private String httpVersion;
     private HttpStatusCode statusCode;
     private String reasonPhrase = null;
@@ -31,6 +29,7 @@ public class HttpResponse extends HttpMessage {
 
     public byte[] getResponseBytes() {
         StringBuilder responseBuilder = new StringBuilder();
+        String CRLF = "\r\n";
         responseBuilder.append(httpVersion)
                 .append(" ")
                 .append(statusCode.STATUS_CODE)
@@ -66,19 +65,13 @@ public class HttpResponse extends HttpMessage {
             return this;
         }
 
-        public Builder reasonPhrase(String reasonPhrase) {
-            response.setReasonPhrase(reasonPhrase);
-            return this;
-        }
-
         public Builder addHeader(String headerName, String headerField) {
             response.addHeaderField(headerName, headerField);
             return this;
         }
 
-        public Builder messageBody(byte[] messageBody) {
+        public void messageBody(byte[] messageBody) {
             response.setMessageBody(messageBody);
-            return this;
         }
 
         public HttpResponse build() {
