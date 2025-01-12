@@ -26,7 +26,7 @@ public class WebRootHandlerTest {
     @Test
     void constructorGoodPath() {
         try {
-            WebRootHandler webRootHandler = new WebRootHandler("/home/yoh/dev/repositories/simple-http-server/webroot");
+            WebRootHandler webRootHandler = new WebRootHandler("/home/yoh/dev/repositories/barebone-http-ws-server/webroot");
         } catch (WebRootNotFoundException e) {
             fail(e);
         }
@@ -35,7 +35,7 @@ public class WebRootHandlerTest {
     @Test
     void constructorBadPath() {
         try {
-            WebRootHandler webRootHandler = new WebRootHandler("E:\\Projects\\CoderFromScratch\\simple-java-http-server\\webroot");
+            WebRootHandler webRootHandler = new WebRootHandler("E:\\Projects\\CoderFromScratch\\barebone-http-ws-server\\webroot");
             fail();
         } catch (WebRootNotFoundException ignored) {
         }
