@@ -10,6 +10,7 @@ import java.lang.reflect.Method;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@SuppressWarnings("ALL")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class WebRootHandlerTest {
     private WebRootHandler webRootHandler;
@@ -26,7 +27,7 @@ public class WebRootHandlerTest {
     @Test
     void constructorGoodPath() {
         try {
-            WebRootHandler webRootHandler = new WebRootHandler("/home/yoh/dev/repositories/barebone-http-ws-server/webroot");
+            new WebRootHandler("/home/yoh/dev/repositories/barebone-http-ws-server/webroot");
         } catch (WebRootNotFoundException e) {
             fail(e);
         }
@@ -35,7 +36,7 @@ public class WebRootHandlerTest {
     @Test
     void constructorBadPath() {
         try {
-            WebRootHandler webRootHandler = new WebRootHandler("E:\\Projects\\CoderFromScratch\\barebone-http-ws-server\\webroot");
+            new WebRootHandler("E:\\Projects\\CoderFromScratch\\barebone-http-ws-server\\webroot");
             fail();
         } catch (WebRootNotFoundException ignored) {
         }
@@ -44,7 +45,7 @@ public class WebRootHandlerTest {
     @Test
     void constructorGoodPath2() {
         try {
-            WebRootHandler webRootHandler = new WebRootHandler("webroot");
+            new WebRootHandler("webroot");
         } catch (WebRootNotFoundException e) {
             fail(e);
         }
@@ -53,7 +54,7 @@ public class WebRootHandlerTest {
     @Test
     void constructorBadPath2() {
         try {
-            WebRootHandler webRootHandler = new WebRootHandler("webroot2");
+            new WebRootHandler("webroot2");
             fail();
         } catch (WebRootNotFoundException ignored) {
         }

@@ -51,7 +51,7 @@ public class WebsocketWorkerThread extends Thread {
             try {
                 socket.close();
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                LOGGER.warn("Failed to close socket: ", e);
             }
         }
     }
@@ -61,7 +61,7 @@ public class WebsocketWorkerThread extends Thread {
      *
      * @param frame frame to be sent
      */
-    private void sendFrame(WebSocketFrame frame) throws IOException, WebSocketParsingException {
+    private void sendFrame(WebSocketFrame frame) throws IOException {
         outputStream.write(frame.generateFrameBytes());
         outputStream.flush();
     }
@@ -74,7 +74,7 @@ public class WebsocketWorkerThread extends Thread {
             WebSocketFrame pingFrame = new WebSocketFrame.Builder().fin(true).opcode(Opcode.PING).build();
             try {
                 sendFrame(pingFrame);
-            } catch (IOException | WebSocketParsingException e) {
+            } catch (IOException e) {
                 throw new RuntimeException(e);
             }
             LOGGER.info("Ping frame sent.");

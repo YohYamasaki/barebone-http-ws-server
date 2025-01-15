@@ -38,12 +38,10 @@ public class ServerListenerThread extends Thread {
             e.printStackTrace();
             LOGGER.error(e.getMessage(), e);
         } finally {
-            if (serverSocket != null) {
-                try {
-                    serverSocket.close();
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
+            try {
+                serverSocket.close();
+            } catch (IOException e) {
+                LOGGER.warn("Failed to close socket: ", e);
             }
         }
     }

@@ -13,6 +13,7 @@ import java.nio.charset.StandardCharsets;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@SuppressWarnings("ALL")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class HttpHeadersParserTest {
     private HttpParser httpParser;

@@ -62,9 +62,7 @@ public class WebSocketParserTest {
     @Test
     public void notMaskedPayloadFrame() throws WebSocketParsingException {
         InputStream inputStream = generateNotMaskedPayloadFrame();
-        WebSocketParsingException exception = assertThrows(WebSocketParsingException.class, () -> {
-            parser.parseWebsocketFrame(inputStream);
-        });
+        WebSocketParsingException exception = assertThrows(WebSocketParsingException.class, () -> parser.parseWebsocketFrame(inputStream));
         assertEquals("Frame from client must be masked.", exception.getMessage());
     }
 
@@ -90,34 +88,34 @@ public class WebSocketParserTest {
         }
     }
 
-    InputStream generateShortSizedPayloadFrame() throws WebSocketParsingException {
+    InputStream generateShortSizedPayloadFrame() {
         String payloadString = "123abc";
         WebSocketFrame frame = new WebSocketFrame.Builder().fin(true).mask(true).opcode(Opcode.TEXT).payload(payloadString.getBytes()).build();
         return new ByteArrayInputStream(frame.generateFrameBytes());
     }
 
-    InputStream generateMediumSizedPayloadFrame() throws WebSocketParsingException {
+    InputStream generateMediumSizedPayloadFrame() {
         WebSocketFrame frame = new WebSocketFrame.Builder().fin(true).mask(true).opcode(Opcode.TEXT).payload("a".repeat(1000).getBytes()).build();
         return new ByteArrayInputStream(frame.generateFrameBytes());
     }
 
-    InputStream generateLargeSizedPayloadFrame() throws WebSocketParsingException {
+    InputStream generateLargeSizedPayloadFrame() {
         WebSocketFrame frame = new WebSocketFrame.Builder().fin(true).mask(true).opcode(Opcode.TEXT).payload("a".repeat(100000).getBytes()).build();
         return new ByteArrayInputStream(frame.generateFrameBytes());
     }
 
-    InputStream generateNotMaskedPayloadFrame() throws WebSocketParsingException {
+    InputStream generateNotMaskedPayloadFrame() {
         String payloadString = "123abc";
         WebSocketFrame frame = new WebSocketFrame.Builder().fin(true).mask(false).opcode(Opcode.TEXT).payload(payloadString.getBytes()).build();
         return new ByteArrayInputStream(frame.generateFrameBytes());
     }
 
-    InputStream generateCloseFrame() throws WebSocketParsingException {
+    InputStream generateCloseFrame() {
         WebSocketFrame frame = new WebSocketFrame.Builder().fin(true).mask(true).opcode(Opcode.CLOSE).build();
         return new ByteArrayInputStream(frame.generateFrameBytes());
     }
 
-    InputStream generatePongFrame() throws WebSocketParsingException {
+    InputStream generatePongFrame() {
         WebSocketFrame frame = new WebSocketFrame.Builder().fin(true).mask(true).opcode(Opcode.PONG).build();
         return new ByteArrayInputStream(frame.generateFrameBytes());
     }

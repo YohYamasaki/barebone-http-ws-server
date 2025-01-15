@@ -4,7 +4,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 
 /**
- * An object to hold WebSocket Frame data.
+ * A class to hold WebSocket Frame data.
  */
 public class WebSocketFrame {
     private final boolean fin;

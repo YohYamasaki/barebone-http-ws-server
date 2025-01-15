@@ -11,6 +11,7 @@ import java.nio.charset.StandardCharsets;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
+@SuppressWarnings("ALL")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class HttpParserTest {
 
@@ -33,13 +34,13 @@ class HttpParserTest {
         }
         assertEquals(request.getMethod(), HttpMethod.GET);
         assertEquals(request.getRequestTarget(), "/");
-        assertEquals(request.getBestCompatibleHttpVersion(), HttpVersion.HTTP_1_1);
+        assertEquals(request.getHttpVersion(), HttpVersion.HTTP_1_1);
     }
 
     @Test
     void parseHttpPostRequest() {
         try {
-            HttpRequest request = httpParser.parseHttpRequest(
+            httpParser.parseHttpRequest(
                     generateValidPOSTTestCase()
             );
             fail();
@@ -51,7 +52,7 @@ class HttpParserTest {
     @Test
     void parseHttpEmptyRequestLine() {
         try {
-            HttpRequest request = httpParser.parseHttpRequest(
+            httpParser.parseHttpRequest(
                     generateBadTestCaseEmptyRequestLine()
             );
             fail();
@@ -63,7 +64,7 @@ class HttpParserTest {
     @Test
     void parseHttpRequestLineCRnoLF() {
         try {
-            HttpRequest request = httpParser.parseHttpRequest(
+            httpParser.parseHttpRequest(
                     generateBadTestCaseRequestLineOnlyCRnoLF()
             );
             fail();
@@ -74,9 +75,8 @@ class HttpParserTest {
 
     @Test
     void parseHttpRequestBadMethod1() {
-        HttpRequest request = null;
         try {
-            request = httpParser.parseHttpRequest(
+            httpParser.parseHttpRequest(
                     generateBadTestCaseMethodName1()
             );
             fail();
@@ -87,9 +87,8 @@ class HttpParserTest {
 
     @Test
     void parseHttpRequestBadMethod2() {
-        HttpRequest request = null;
         try {
-            request = httpParser.parseHttpRequest(
+            httpParser.parseHttpRequest(
                     generateBadTestCaseMethodName2()
             );
             fail();
@@ -100,9 +99,8 @@ class HttpParserTest {
 
     @Test
     void parseHttpRequestLineInvalidNumItems() {
-        HttpRequest request = null;
         try {
-            request = httpParser.parseHttpRequest(
+            httpParser.parseHttpRequest(
                     generateBadTestCaseRequestLineInvalidNumItems1()
             );
             fail();
@@ -113,9 +111,8 @@ class HttpParserTest {
 
     @Test
     void parseHttpRequestEmptyRequestLine() {
-        HttpRequest request = null;
         try {
-            request = httpParser.parseHttpRequest(
+            httpParser.parseHttpRequest(
                     generateBadTestCaseEmptyRequestLine()
             );
             fail();
@@ -126,9 +123,8 @@ class HttpParserTest {
 
     @Test
     void parseHttpRequestOnlyCRnoLF() {
-        HttpRequest request = null;
         try {
-            request = httpParser.parseHttpRequest(
+            httpParser.parseHttpRequest(
                     generateBadTestCaseRequestLineOnlyCRnoLF()
             );
             fail();
@@ -140,7 +136,7 @@ class HttpParserTest {
     @Test
     void parseHttpRequestBadHttpVersion() {
         try {
-            HttpRequest request = httpParser.parseHttpRequest(
+            httpParser.parseHttpRequest(
                     generateBadHttpVersionTestCase()
             );
             fail();
@@ -152,7 +148,7 @@ class HttpParserTest {
     @Test
     void parseHttpRequestUnsupportedHttpVersion() {
         try {
-            HttpRequest request = httpParser.parseHttpRequest(
+            httpParser.parseHttpRequest(
                     generateUnsupportedHttpVersionTestCase()
             );
             fail();

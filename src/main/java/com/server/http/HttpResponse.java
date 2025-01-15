@@ -1,7 +1,7 @@
 package com.server.http;
 
 /**
- * An object to hold HTTP response data.
+ * A class to hold HTTP response data.
  */
 public class HttpResponse extends HttpMessage {
     private final String httpVersion;
@@ -10,9 +10,7 @@ public class HttpResponse extends HttpMessage {
     private HttpResponse(HttpResponse.Builder builder) {
         this.httpVersion = builder.httpVersion;
         this.statusCode = builder.statusCode;
-        builder.getHeaderFieldNames().forEach(name -> {
-            this.addHeaderField(name, builder.getHeaderFields(name));
-        });
+        builder.getHeaderFieldNames().forEach(name -> this.addHeaderField(name, builder.getHeaderFields(name)));
         this.setMessageBody(builder.getMessageBody());
     }
 
@@ -76,9 +74,8 @@ public class HttpResponse extends HttpMessage {
             return this;
         }
 
-        public Builder messageBody(byte[] messageBody) {
+        public void messageBody(byte[] messageBody) {
             this.setMessageBody(messageBody);
-            return this;
         }
 
         public HttpResponse build() {

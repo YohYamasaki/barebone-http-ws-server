@@ -25,6 +25,7 @@ public class WebRootHandler {
      * @param relativePath The relative path to the file
      * @return true if the path exists inside webroot
      */
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     private boolean doesProvidedRelativePathExists(String relativePath) {
         File file = new File(webRoot, relativePath);
         if (!file.exists())

@@ -5,21 +5,12 @@ import org.apache.commons.codec.digest.DigestUtils;
 import java.util.Base64;
 
 /**
- * An object to hold HTTP request data.
+ * A class to hold HTTP request data.
  */
 public class HttpRequest extends HttpMessage {
     private HttpMethod method;
     private String requestTarget;
     private HttpVersion httpVersion;
-
-    /**
-     * Set HTTP version by string.
-     *
-     * @param httpVersionString HTTP version as string
-     */
-    public void setHttpVersion(String httpVersionString) throws HttpParsingException, BadHttpVersionException {
-        this.httpVersion = HttpVersion.fromString(httpVersionString);
-    }
 
     public HttpMethod getMethod() {
         return method;
@@ -42,8 +33,17 @@ public class HttpRequest extends HttpMessage {
         );
     }
 
-    public HttpVersion getBestCompatibleHttpVersion() {
+    public HttpVersion getHttpVersion() {
         return httpVersion;
+    }
+
+    /**
+     * Set HTTP version by string.
+     *
+     * @param httpVersionString HTTP version as string
+     */
+    public void setHttpVersion(String httpVersionString) throws HttpParsingException {
+        this.httpVersion = HttpVersion.fromString(httpVersionString);
     }
 
     public String getRequestTarget() {
@@ -69,6 +69,7 @@ public class HttpRequest extends HttpMessage {
                 && hasHeaderValue("Connection", "Upgrade")
                 && hasHeaderField("Origin")
                 && hasHeaderField("Sec-WebSocket-Key")
+                && websocketKeyValue != null
                 && websocketKeyValue.length() == 24 // Base64 encoded 16 byte nonce should have 24 characters
                 && "13".equals(getHeaderFields("Sec-WebSocket-Version"));
     }
@@ -108,7 +109,6 @@ public class HttpRequest extends HttpMessage {
             throw new HttpParsingException(HttpStatusCode.CLIENT_ERROR_400_BAD_REQUEST);
         }
         final byte[] hash = DigestUtils.sha1(websocketKeyValue + "258EAFA5-E914-47DA-95CA-C5AB0DC85B11");
-        System.out.println();
         return Base64.getEncoder().encodeToString(hash);
     }
 }

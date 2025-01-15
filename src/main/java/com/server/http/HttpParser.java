@@ -70,11 +70,7 @@ public class HttpParser {
                 }
 
                 // HTTP version is placed right before the CRLF in the first line
-                try {
-                    request.setHttpVersion(processingDataBuffer.toString());
-                } catch (BadHttpVersionException e) {
-                    throw new HttpParsingException(HttpStatusCode.CLIENT_ERROR_400_BAD_REQUEST);
-                }
+                request.setHttpVersion(processingDataBuffer.toString());
 
                 return;
             } else {
@@ -104,9 +100,9 @@ public class HttpParser {
                 if (b != LF) {
                     throw new HttpParsingException(HttpStatusCode.CLIENT_ERROR_400_BAD_REQUEST);
                 }
-                // Two CRLF received, end of Headers section
+                // Two CRLF received, end of header fields section
                 if (crlfFound) return;
-                // Handle
+                // Handle header field line
                 crlfFound = true;
                 processSingleHeaderField(processingDataBuffer.toString(), request);
                 processingDataBuffer.delete(0, processingDataBuffer.length());

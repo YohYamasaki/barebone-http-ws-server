@@ -78,7 +78,7 @@ public class HttpConnectionWorkerThread extends Thread {
     private HttpResponse handleGetRequest(HttpRequest request) {
         try {
             HttpResponse.Builder builder = new HttpResponse.Builder()
-                    .httpVersion(request.getBestCompatibleHttpVersion().literal)
+                    .httpVersion(request.getHttpVersion().literal)
                     .statusCode(HttpStatusCode.OK)
                     .addHeader(HttpHeaderFieldName.CONTENT_TYPE.headerName, webRootHandler.getFileMimeType(request.getRequestTarget()));
             byte[] messageBody = webRootHandler.getFileByteArrayData(request.getRequestTarget());
@@ -87,12 +87,12 @@ public class HttpConnectionWorkerThread extends Thread {
             return builder.build();
         } catch (FileNotFoundException e) {
             return new HttpResponse.Builder()
-                    .httpVersion(request.getBestCompatibleHttpVersion().literal)
+                    .httpVersion(request.getHttpVersion().literal)
                     .statusCode(HttpStatusCode.CLIENT_ERROR_404_NOT_FOUND)
                     .build();
         } catch (ReadFileException e) {
             return new HttpResponse.Builder()
-                    .httpVersion(request.getBestCompatibleHttpVersion().literal)
+                    .httpVersion(request.getHttpVersion().literal)
                     .statusCode(HttpStatusCode.SERVER_ERROR_500_INTERNAL_SERVER_ERROR)
                     .build();
         }
@@ -105,7 +105,7 @@ public class HttpConnectionWorkerThread extends Thread {
      */
     private void handleWebSocketUpgradeRequest(HttpRequest request) throws HttpParsingException, IOException {
         HttpResponse handshakeResponse = new HttpResponse.Builder()
-                .httpVersion(request.getBestCompatibleHttpVersion().literal)
+                .httpVersion(request.getHttpVersion().literal)
                 .statusCode(HttpStatusCode.WEBSOCKET_UPGRADE)
                 .addHeader("Upgrade", "websocket")
                 .addHeader("Connection", "Upgrade")
